@@ -67,20 +67,21 @@ public class CubesSpawner : MonoBehaviour
     private void OnColorChanged(Cube cube)
     {
         cube.ColorChanged -= OnColorChanged;
-        _pool.Release(cube);       
+
+        _pool.Release(cube);
     }
 
     private Vector3 GetRandomPosition()
     {
         int minForPosition = -14;
         int maxForPosition = 14;
-        int tempForMaxBoar = 1;
+        int tempForMaxBorder = 1;
         int maxForHeight = 15;
 
         Random random = new();
 
-        return new Vector3(random.Next(minForPosition, maxForPosition + tempForMaxBoar),
-            maxForHeight, random.Next(minForPosition, maxForPosition + tempForMaxBoar));
+        return new Vector3(random.Next(minForPosition, maxForPosition + tempForMaxBorder),
+            maxForHeight, random.Next(minForPosition, maxForPosition + tempForMaxBorder));
     }
 }
 

@@ -28,7 +28,9 @@ public class Cube : MonoBehaviour
 
     private void OnCollisionDetected()
     {
-        float timeToDestroy = _random.Next(_minTimeToDestroy, _maxTimeToDestroy);
+        int tempForMaxBorder = 1;
+
+        float timeToDestroy = _random.Next(_minTimeToDestroy, _maxTimeToDestroy + tempForMaxBorder);
 
         if (_mustToColor)
         {

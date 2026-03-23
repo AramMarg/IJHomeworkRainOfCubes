@@ -6,6 +6,7 @@ public class Colorer : MonoBehaviour
 
     private Renderer _cubeRenderer;
 
+    // Delete!!!можно Cube cube если сидит он на нем
     public void ChangeColor(Cube cube)
     {
         if (cube.TryGetComponent(out Renderer renderer))
