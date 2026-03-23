@@ -1,9 +1,25 @@
 using UnityEngine;
 
-public class Colorer 
+public class Colorer : MonoBehaviour
 {
-    public void ChangeColor(Renderer renderer)
+    private Color _initialColor;
+
+    private Renderer _cubeRenderer;
+
+    public void ChangeColor(Cube cube)
     {
-        renderer.material.color = Color.blue;
+        if (cube.TryGetComponent(out Renderer renderer))
+        {
+            _cubeRenderer = renderer;
+
+            _initialColor = renderer.material.color;
+
+            renderer.material.color = new Color(Random.value, Random.value, Random.value);
+        }
+    }
+
+    public void ResetColor()
+    {
+        _cubeRenderer.material.color = _initialColor;
     }
 }

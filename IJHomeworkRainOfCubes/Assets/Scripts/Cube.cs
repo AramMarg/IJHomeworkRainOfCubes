@@ -2,55 +2,51 @@ using System;
 using Random = System.Random;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Rigidbody), typeof(Renderer))]
 public class Cube : MonoBehaviour
 {
-    private Colorer _colorer = new();
+    [SerializeField] private Colorer _colorer;
+    [SerializeField] private CollisionDetector _collisionDetector;
 
     private Random _random = new();
     private int _minTimeToDestroy = 2;
     private int _maxTimeToDestroy = 5;
 
     private bool _mustToColor = true;
-    private Renderer _cubeRenderer;
-    private Color _initialColor;
 
-    public event Action ColorChanged;
+    public event Action<Cube> ColorChanged;
 
-    private void Awake()
+    private void OnEnable()
     {
-        if (gameObject.TryGetComponent(out Renderer renderer))
-        {
-            _cubeRenderer = renderer;
-
-            _initialColor = renderer.material.color;
-        }
+        _collisionDetector.CollisionDetected += OnCollisionDetected;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnDisable()
     {
-        if (collision.gameObject.TryGetComponent<Platform>(out _))
+        _collisionDetector.CollisionDetected -= OnCollisionDetected;
+    }
+
+    private void OnCollisionDetected()
+    {
+        float timeToDestroy = _random.Next(_minTimeToDestroy, _maxTimeToDestroy);
+
+        if (_mustToColor)
         {
-            float timeToDestroy = _random.Next(_minTimeToDestroy, _maxTimeToDestroy);
+            _colorer.ChangeColor(this);
 
-            if (_mustToColor)
-            {
-                _colorer.ChangeColor(_cubeRenderer);
+            _mustToColor = false;
 
-                _mustToColor = !_mustToColor;
-
-                Invoke(nameof(ReleaseCube), timeToDestroy);
-            }
+            Invoke(nameof(ReleaseCube), timeToDestroy);
         }
     }
 
     private void ReleaseCube()
     {
-        //_cubeRenderer.material.color = _initialColor;
+        _mustToColor = true;
 
-        ColorChanged?.Invoke();
+        _colorer.ResetColor();
 
-        Destroy(gameObject);
+        ColorChanged?.Invoke(this);
     }
 }
 

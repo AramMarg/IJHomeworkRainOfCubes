@@ -5,23 +5,22 @@ using UnityEngine.Pool;
 
 public class CubesSpawner : MonoBehaviour
 {
-    [SerializeField] private Cube _forEvent;
-    [SerializeField] private GameObject _cube;
+    [SerializeField] private Cube _cube;
     [SerializeField] private int _poolCapacity = 5;
     [SerializeField] private int _maxSize = 5;
 
     private Coroutine _coroutine;
     private float _delay = 0.5f;
 
-    private ObjectPool<GameObject> _pool;
+    private ObjectPool<Cube> _pool;
 
     private void Awake()
     {
-        _pool = new ObjectPool<GameObject>
+        _pool = new ObjectPool<Cube>
         (
         createFunc: () => Instantiate(_cube),
-        actionOnGet: (cube) => ActionOnGet(cube),
-        actionOnRelease: (cube) => ActionOnRelease(cube),
+        actionOnGet: (cube) => OnActionGet(cube),
+        actionOnRelease: (cube) => OnActionRelease(cube),
         actionOnDestroy: (cube) => Destroy(cube),
         collectionCheck: true,
         defaultCapacity: _poolCapacity,
@@ -29,22 +28,11 @@ public class CubesSpawner : MonoBehaviour
         );
     }
 
-    private void OnEnable()
-    {
-        _forEvent.ColorChanged += OnColorChanged;
-    }
-
-    private void OnDisable()
-    {
-        _forEvent.ColorChanged -= OnColorChanged;
-    }
-
     private void Start()
     {
         _coroutine = StartCoroutine(nameof(StartPooling));
     }
  
-
     private IEnumerator StartPooling()
     {
         WaitForSeconds wait = new(_delay);
@@ -57,33 +45,42 @@ public class CubesSpawner : MonoBehaviour
         }
     }
 
-    private void ActionOnGet(GameObject cube)
+    private void OnActionGet(Cube cube)
     {
         cube.transform.position = GetRandomPosition();
-        cube.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        cube.SetActive(true);
+
+        if (cube.TryGetComponent(out Rigidbody rigidbody))
+        {
+            rigidbody.velocity = Vector3.zero;
+        }
+
+        cube.ColorChanged += OnColorChanged;
+
+        cube.gameObject.SetActive(true);
     }
 
-    private void ActionOnRelease(GameObject cube)
+    private void OnActionRelease(Cube cube)
     {
-        cube.SetActive(false);
+        cube.gameObject.SetActive(false);
     }
 
-    private void OnColorChanged()
+    private void OnColorChanged(Cube cube)
     {
-        _pool.Release(_cube);       
+        cube.ColorChanged -= OnColorChanged;
+        _pool.Release(cube);       
     }
 
     private Vector3 GetRandomPosition()
     {
-        int minForPosition = -15;
-        int maxForPosition = 15;
+        int minForPosition = -14;
+        int maxForPosition = 14;
+        int tempForMaxBoar = 1;
         int maxForHeight = 15;
 
         Random random = new();
 
-        return new Vector3(random.Next(minForPosition, maxForPosition),
-            maxForHeight, random.Next(minForPosition, maxForPosition));
+        return new Vector3(random.Next(minForPosition, maxForPosition + tempForMaxBoar),
+            maxForHeight, random.Next(minForPosition, maxForPosition + tempForMaxBoar));
     }
 }
 
